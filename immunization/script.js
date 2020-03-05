@@ -169,41 +169,6 @@ Vue.component('immunization-component', {
 let DATA = new Vue({
     el: '#body',
     data: {
-        config: [
-            {
-                name: 'At Birth',
-                vaccines: [
-                    {
-                        vaccineCode : {
-                            coding: "102",
-                            text: "DTP-Hib-Hep B"
-                        }
-                    },
-                    {
-                        vaccineCode : {
-                            coding: "104",
-                            text: "DTP-Hib"
-                        }
-                    }
-                ]
-            },
-            {
-                name: '1. Months',
-                vaccines: [
-                    {
-                        vaccineCode : {
-                            coding: "102",
-                            text: "DTP-Hib-Hep B"
-                        }
-                    },
-                    {
-                        vaccineCode : {
-                            coding: "104",
-                            text: "DTP-Hib"
-                        }
-                    }
-                ]
-            }
-        ]
+        config: defaultConfig
     }
 })
