@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <title>Immunization component</title>
+</head>
+<body>
+    <section class="section">
+        <div class="container">
+            <h2 class="title">Immunization Details</h1>
+                <!-- Months of immunization -->
+                <div class="tabs">
+                    <ul>
+                      <li class="is-active"><a>At birth</a></li>
+                      <li><a>1½ months</a></li>
+                      <li><a>2½ months</a></li>
+                      <li><a>3½ months</a></li>
+                    </ul>
+                  </div>
+                <div class="container">
+                    <!-- Age and Date at which age is attained -->
+                    <div class="level is-mobile">
+                        <div class="level-left">
+                            <h1 class="title">
+                                At birth
+                            </h1>
+                        </div>
+                        <div class="level-right">
+                            <h1 class="subtitle">
+                                [19-Sep-2019]
+                            </h1>
+                        </div>
+                    </div>
+                    <!-- Vaccinations to be given -->
+                    <div class="level is-mobile">
+                        <div class="level-left">
+                            <h3 class="is-size-4">LVP</h3>
+                        </div>
+                        <div class="level-right">
+                            <button class="button has-text-primary">
+                                <span class="icon">
+                                    <i class="fa fa-calendar" aria-hidden="true"></i>
+                                </span>
+                                <span class="is-size-6 is-uppercase has-text-weight-semibold">
+                                    Set date
+                                </span>
+                            </button>
+                            
+                        </div>
+                    </div>
+                    <!-- Done button -->
+                    <div class="level is-mobile">
+                        <div class="level-left">
+                        </div>
+                        <div class="level-right">
+                            <!-- Remove is-loading to see text -->
+                            <button class="button is-primary is-loading"> 
+                                    <span class="icon">
+                                        <i class="fa fa-check" aria-hidden="true"></i>
+                                    </span>
+                                    <span class="is-size-6 is-uppercase has-text-weight-semibold">
+                                        Done
+                                    </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </section>
+</body>
+</html>
