@@ -128,65 +128,6 @@ Vue.component('immunization-component', {
 new Vue({
     el: '#body',
     data: {
-        config: [
-            {
-                name: 'At Birth',
-                vaccines: [
-                    {
-                        vaccineCode : {
-                            coding: "",
-                            text: ""
-                        },
-                        manufacturer : {
-                            reference: "",
-                            type: ""
-                        },
-                        lotNumber : "",
-                        expirationDate : "",
-                        site : {
-                                coding: "",
-                                text: ""
-                            },
-                        route : {
-                                coding: "",
-                                text: ""
-                            },
-                        doseQuantity : {
-                                value: 0,
-                                unit: "",
-                                system: "",
-                                code: ""
-                            },
-                        programEligibility : [
-                                {
-                                    coding: "",
-                                    text: ""
-                                }
-                            ],
-                        fundingSource : {
-                                coding: "",
-                                text: ""
-                            },
-                        protocolApplied : [
-                            {
-                                series : "",
-                                authority : {
-                                    reference: "",
-                                    type: ""
-                                },
-                                targetDisease : [
-                                    {
-                                        coding: "",
-                                        text: ""
-                                    }
-                                ],
-                                doseNumberPositiveInt : "",
-                                seriesDosesPositiveInt : ""
-                            }
-                        ]
-                    }
-                ]
-            }
-        ]
+        config: defaultConfig
     }
 })
