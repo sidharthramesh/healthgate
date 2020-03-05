@@ -155,7 +155,7 @@ defaultConfig = [
         ],
     },
     {
-        name: "1.5 months",
+        name: "1½ months",
         vaccines: [
             {
                 vaccineCode : {
@@ -342,7 +342,7 @@ defaultConfig = [
         ]
     },
     {
-        name: "2.5 months",
+        name: "2½ months",
         vaccines: [
             {
                 vaccineCode : {
@@ -481,7 +481,7 @@ defaultConfig = [
         ],
     },
     {
-        name: "3.5 months",
+        name: "3½ months",
         vaccines: [
             {
                 vaccineCode : {
@@ -721,7 +721,7 @@ defaultConfig = [
         ]
     },
     {
-        name: "1.5 years",
+        name: "1½ years",
         vaccines: [
             {
                 vaccineCode : {
