@@ -159,7 +159,7 @@ Vue.component('immunization-component', {
         done () {
             // Complie and emit
             if (this.validate()) {
-                / Compile
+                // Compile
             }
         }
     },
