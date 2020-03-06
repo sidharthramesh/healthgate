@@ -12,7 +12,7 @@
 
     <div id="body">
 
-        <immunization-component :config="config"/>
+        <immunization-component :config="config" :patientdata="patientData" :hospitaldata="hospitalData" @done="console"/>
 
         <template id="temp" ref="temp">
             <section class="section">
@@ -36,7 +36,7 @@
                                 </div>
                                 <div class="level-right">
                                     <h1 class="subtitle">
-                                        [19-Sep-2019]
+                                        {{ ptn_age }}
                                     </h1>
                                 </div>
                             </div>
@@ -47,7 +47,7 @@
                                         <h3 class="is-size-4">{{vaccine.vaccineCode.text}}</h3>
                                     </div>
                                     <div class="level-right">
-                                        <template v-if="vaccine.givenOn === undefined">
+                                        <template v-if="getPatientsDateFor(vaccine) === false && !isSet(vaccine)">
                                             <button class="button has-text-primary" @click="setVaccineDate(vaccine)">
                                                 <span class="icon">
                                                     <i class="fa fa-calendar" aria-hidden="true"></i>
@@ -57,29 +57,36 @@
                                                 </span>
                                             </button>
                                         </template>
+                                        <template v-else-if="isSet(vaccine)">
+                                            <span class="icon">
+                                                <i class="fa fa-check" aria-hidden="true"></i>
+                                            </span>
+                                        </template>
                                         <template v-else>
-                                            {{vaccine.givenOn}}
+                                            {{ getPatientsDateFor(vaccine) }}
                                         </template>
                                         
                                     </div>
                                 </div>
                             </template>
                             <!-- Done button -->
-                            <div class="level is-mobile">
-                                <div class="level-left">
+                            <template v-if="doneYet">
+                                <div class="level is-mobile">
+                                    <div class="level-left">
+                                    </div>
+                                    <div class="level-right">
+                                        <!-- Remove is-loading to see text -->
+                                        <button class="button is-primary" :class="{ 'is-loading': sending }" @click="done()"> 
+                                                <span class="icon">
+                                                    <i class="fa fa-check" aria-hidden="true"></i>
+                                                </span>
+                                                <span class="is-size-6 is-uppercase has-text-weight-semibold">
+                                                    Done
+                                                </span>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="level-right">
-                                    <!-- Remove is-loading to see text -->
-                                    <button class="button is-primary" :class="{ 'is-loading': sending }" @click="done()"> 
-                                            <span class="icon">
-                                                <i class="fa fa-check" aria-hidden="true"></i>
-                                            </span>
-                                            <span class="is-size-6 is-uppercase has-text-weight-semibold">
-                                                Done
-                                            </span>
-                                    </button>
-                                </div>
-                            </div>
+                            </template>
                         </div>
                 </div>
             </section>
