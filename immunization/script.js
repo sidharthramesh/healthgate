@@ -1,119 +1,51 @@
 // V0.1
 
 let IMMUNIZATION_FHIR = `{
-
-    resourceType : "Immunization",
-    status : "completed",
-    vaccineCode : {
-        coding: "",
-        text: ""
+    "resourceType" : "Immunization",
+    "status" : "completed",
+    "patient" : {
+        "reference": ""
     },
-    patient : {
-        reference: "",
-        type: ""
+    "encounter" : {
+        "reference": ""
     },
-    encounter : {
-        reference: "",
-        type: ""
-    },
-    occurrenceDateTime : "",
-    recorded : "",
-    primarySource : true,
-    location : {
-        reference: "",
-        type: ""
-    },
-    manufacturer : {
-        reference: "",
-        type: ""
-    },
-    lotNumber : "",
-    expirationDate : "",
-    site : {
-        coding: "",
-        text: ""
-    },
-    route : {
-        coding: "",
-        text: ""
-    },
-    doseQuantity : {
-        value: 0,
-        unit: "",
-        system: "",
-        code: ""
-    },
-    performer : [
+    "occurrenceDateTime" : "",
+    "primarySource" : true,
+    "performer" : [
         {
-            actor : {
-                reference: "",
-                type: "Practitioner"
+            "actor" : {
+                "reference": ""
             }
         }
     ],
-    note : [
+    "note" : [
         {
-            text: "HealthGate Immunization Component v0.1"
+            "text": "HealthGate Immunization Component v0.1"
         }
     ],
-    education : [{
-        documentType : "HealthGate Passport",
-        publicationDate : "05-03-20202020-03-05T07:22:31.345Z",
-        presentationDate : ""
-    }],
-    programEligibility : [
-        {
-            coding: "",
-            text: ""
-        }
-    ],
-    fundingSource : {
-        coding: "",
-        text: ""
-    },
-    protocolApplied : [
-        {
-            series : "",
-            authority : {
-                reference: "",
-                type: ""
-            },
-            targetDisease : [
-                {
-                    coding: "",
-                    text: ""
-                }
-            ],
-            doseNumberPositiveInt : "",
-            seriesDosesPositiveInt : ""
-        }
-    ]
-
+    "education" : [{
+        "documentType" : "HealthGate Passport",
+        "publicationDate" : "05-03-20202020-03-05T07:22:31.345Z"
+    }]
 }`;
 
 Vue.component('immunization-component', {
-    props: ['config', 'patientData', 'hospitalData'],
+    props: ['config', 'patientdata', 'hospitaldata'],
     data () {
         return {
             currentMonth: '',
             tabData: [],
             setData: [],
-            sending: false
+            sending: false,
+            doneYet: false,
+            api: undefined,
+            patientDetails: {
+                vaccines: [],
+                patient: undefined
+            }
         };
     },
     computed: {
-        _patientData () {
-            let ptnData = {};
-            ptnData.id = this.patientData.id || "";
-            ptnData.birthdate = this.patientData.birthdate || "";
-            return ptnData;
-        },
-        _hospitalData () {
-            let hospData = {};
-            hospData.id = this.hospitalData.id || "";
-            hospData.actor = this.hospitalData.actorId || "";
-            return hospData;
-        },
         _config () {
             return JSON.parse(JSON.stringify(this.config));
         },
@@ -130,38 +62,140 @@ Vue.component('immunization-component', {
         },
         ptn_age () {
             return "";
+        },
+        ptn_info () {
+            return this.patientDetails
         }
     },
     methods: {
+        async getPatientDetails (patientData) {
+            var vaccines = await this.api.list(patientData.reference, "Immunization")
+            var patient = await this.api.list(patientData.reference, "Patient")
+            console.log(vaccines)
+            patient = await Promise.all(patient.map(hash=>this.api.get(hash)))
+            vaccines = (await Promise.all(vaccines.map(hash=>this.api.get(hash)))).map(
+                a=>{
+                    try{
+                        return JSON.parse(a)
+                    }
+                    catch (err) {
+                        return
+                    }
+                }
+                ).filter(a=>a)
+            return {
+                vaccines: vaccines,
+                patient: patient
+            }
+        },
+
         openMonth (month) {
             this.currentMonth = month;
             let monthObj = this._config.find(a => a.name === month);
             this.tabData = monthObj.vaccines.map(a => {
-                a.givenOn = a.givenOn || undefined;
+                a.occurrenceDateTime = a.occurrenceDateTime || undefined;
                 return a;
             });
         },
 
         setVaccineDate (vaccine) {
-            vaccine.givenOn = new Date().toISOString();
+            this.doneYet = true;
+            vaccine.occurrenceDateTime = new Date().toISOString();
             this.setData.push(vaccine);
+
+        },
+
+        isSet (vaccine) {
+            return (this.setData.find(v => v.vaccineCode.text === vaccine.vaccineCode.text) !== undefined)
+        },
+
+        getPatientsDateFor (vaccine) {
+            let data = this.ptn_info.vaccines.find(v => v.vaccineCode.text === vaccine.vaccineCode.text);
+            return (data && data.status === 'completed') ? new Date(data.occurrenceDateTime).toLocaleDateString("en-IN") : false;
+        },
+
+        async createEncounterFHIR (patientData, hospitalData) {
+            return JSON.stringify({
+                "resourceType": "Encounter",
+                "status": "finished",
+                "class": {
+                  "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+                  "code": "AMB"
+                },
+                "subject": {
+                  "reference": patientData.reference
+                },
+                "participant": [
+                  {
+                    "individual": {
+                      "reference": hospitalData.performer[0].actor.reference
+                    }
+                  }
+                ],
+                "period": {
+                  "start": new Date().toISOString()
+                },
+                "serviceProvider": {
+                  "reference": hospitalData.performer[0].actor.reference
+                }
+        })},
+
+        createImmunizationFHIR (immunization, patientData, hospitalData, encounter) {
+            let fhir = JSON.parse(IMMUNIZATION_FHIR);
+            immunization = JSON.parse(JSON.stringify(immunization));
+            patientData = JSON.parse(JSON.stringify(patientData));
+            hospitalData = JSON.parse(JSON.stringify(hospitalData));
+            encounter = JSON.parse(JSON.stringify(encounter));
+            return JSON.stringify(Object.assign(fhir, immunization, patientData, hospitalData, encounter));
         },
 
         validate () {
-            if (this.setData.length === 0 &&
-                this._patientData.id &&
-                this._hospitalData.actor &&
-                this._hospitalData.id ) {
+            if (this.setData.length > 0 &&
+                this.patientdata &&
+                this.hospitaldata ) {
                 return true;
             }
+            else {
+                throw new Error('Not valid data');
+            }
         },
-
-        done () {
+        async postFHIR(fhir, patientData) {
+            hash = await this.api.add(fhir, "Immunization")
+            await this.api.permit(hash, patientData.reference)
+            return hash
+        },
+        async done () {
             // Complie and emit
             if (this.validate()) {
                 // Compile
+                this.sending = true;
+                let fhirs = [];
+                let encounter = this.createEncounterFHIR(this.patientdata, this.hospitaldata);
+                let encounterHash = await this.postFHIR(encounter, this.patientdata)
+                fhirs.push(encounterHash);
+                let immuns = this.setData.map(data => this.createImmunizationFHIR(data, {
+                    patient: this.patientdata
+                }, this.hospitaldata, {
+                    encounter: {
+                        reference: hash
+                    }
+                }));
+                let hashList = await Promise.all(immuns.map(fhir=>this.postFHIR(fhir, this.patientdata)))
+                fhirs = fhirs.concat(hashList);
+                //Set this 
+                this.patientDetails = await this.getPatientDetails(this.patientdata)
+                this.sending = false;
+                this.setData = [];
+                this.doneYet = false;
+                this.$emit('done', fhirs);
             }
         }
+    },
+    async mounted () {
+        this.openMonth(this.months[0]);
+        this.api = await new MedBlocks()
+        await this.api.login(this.hospitaldata.performer[0].actor.reference)
+        this.patientDetails = await this.getPatientDetails(this.patientdata)
     },
     template: `#temp`
 });
@@ -169,6 +203,26 @@ Vue.component('immunization-component', {
 let DATA = new Vue({
     el: '#body',
     data: {
-        config: defaultConfig
+        config: defaultConfig,
+        patientData: {
+            reference: "tornadoalert@gmail.com"
+        },
+        hospitalData: {
+            performer: [
+                {
+                    actor: {
+                        reference: "doctor@healthgate.com"
+                    }
+                }
+            ],
+            location: {
+                reference: "1236"
+            }
+        }
+    },
+    methods: {
+        console (...a) {
+            console.log(...a);
+        }
     }
 })

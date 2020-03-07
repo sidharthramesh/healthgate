@@ -1,0 +1,22 @@
+{
+  "name": "healthgate",
+  "version": "0.0.1",
+  "description": "FHIR compatible Vue components",
+  "dependencies": {
+    "medblocks": "^0.0.2-1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sidharthramesh/healthgate.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sidharthramesh/healthgate/issues"
+  },
+  "homepage": "https://github.com/sidharthramesh/healthgate#readme"
+}
