@@ -37,7 +37,12 @@ Vue.component('immunization-component', {
             tabData: [],
             setData: [],
             sending: false,
-            doneYet: false
+            doneYet: false,
+            api: undefined,
+            patientDetails: {
+                vaccines: [],
+                patient: undefined
+            }
         };
     },
     computed: {
@@ -59,21 +64,30 @@ Vue.component('immunization-component', {
             return "";
         },
         ptn_info () {
-            return {
-                vaccines: [
-                    {
-                        vaccineCode: {
-                            text: "BCG 0"
-                        },
-                        completed: true,
-                        occurrenceDateTime: "2020-03-06T10:14:40.854Z"
-                    }
-                ]
-            }
+            return this.patientDetails
         }
     },
     methods: {
-        getPatientDetails () {},
+        async getPatientDetails (patientData) {
+            var vaccines = await this.api.list(patientData.reference, "Immunization")
+            var patient = await this.api.list(patientData.reference, "Patient")
+            console.log(vaccines)
+            patient = await Promise.all(patient.map(hash=>this.api.get(hash)))
+            vaccines = (await Promise.all(vaccines.map(hash=>this.api.get(hash)))).map(
+                a=>{
+                    try{
+                        return JSON.parse(a)
+                    }
+                    catch (err) {
+                        return
+                    }
+                }
+                ).filter(a=>a)
+            return {
+                vaccines: vaccines,
+                patient: patient
+            }
+        },
 
         openMonth (month) {
             this.currentMonth = month;
@@ -97,14 +111,34 @@ Vue.component('immunization-component', {
 
         getPatientsDateFor (vaccine) {
             let data = this.ptn_info.vaccines.find(v => v.vaccineCode.text === vaccine.vaccineCode.text);
-            return (data && data.completed) ? data.occurrenceDateTime : false;
+            return (data && data.status === 'completed') ? new Date(data.occurrenceDateTime).toLocaleDateString("en-IN") : false;
         },
 
-        createEncounterFHIR (patientData, hospitalData) {
-            return {
-                reference: "1234"
-            };
-        },
+        async createEncounterFHIR (patientData, hospitalData) {
+            return JSON.stringify({
+                "resourceType": "Encounter",
+                "status": "finished",
+                "class": {
+                  "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+                  "code": "AMB"
+                },
+                "subject": {
+                  "reference": patientData.reference
+                },
+                "participant": [
+                  {
+                    "individual": {
+                      "reference": hospitalData.performer[0].actor.reference
+                    }
+                  }
+                ],
+                "period": {
+                  "start": new Date().toISOString()
+                },
+                "serviceProvider": {
+                  "reference": hospitalData.performer[0].actor.reference
+                }
+        })},
 
         createImmunizationFHIR (immunization, patientData, hospitalData, encounter) {
             let fhir = JSON.parse(IMMUNIZATION_FHIR);
@@ -112,7 +146,7 @@ Vue.component('immunization-component', {
             patientData = JSON.parse(JSON.stringify(patientData));
             hospitalData = JSON.parse(JSON.stringify(hospitalData));
             encounter = JSON.parse(JSON.stringify(encounter));
-            return Object.assign(fhir, immunization, patientData, hospitalData, encounter);
+            return JSON.stringify(Object.assign(fhir, immunization, patientData, hospitalData, encounter));
         },
 
         validate () {
@@ -125,29 +159,43 @@ Vue.component('immunization-component', {
                 throw new Error('Not valid data');
             }
         },
-
-        done () {
+        async postFHIR(fhir, patientData) {
+            hash = await this.api.add(fhir, "Immunization")
+            await this.api.permit(hash, patientData.reference)
+            return hash
+        },
+        async done () {
             // Complie and emit
             if (this.validate()) {
                 // Compile
                 this.sending = true;
                 let fhirs = [];
-                let encounter = this.createEncounterFHIR(this.patientata, this.hospitaldata);
-                fhirs.push(encounter);
+                let encounter = this.createEncounterFHIR(this.patientdata, this.hospitaldata);
+                let encounterHash = await this.postFHIR(encounter, this.patientdata)
+                fhirs.push(encounterHash);
                 let immuns = this.setData.map(data => this.createImmunizationFHIR(data, {
                     patient: this.patientdata
                 }, this.hospitaldata, {
-                    encounter: encounter
+                    encounter: {
+                        reference: hash
+                    }
                 }));
-                fhirs = fhirs.concat(immuns);
+                let hashList = await Promise.all(immuns.map(fhir=>this.postFHIR(fhir, this.patientdata)))
+                fhirs = fhirs.concat(hashList);
+                //Set this 
+                this.patientDetails = await this.getPatientDetails(this.patientdata)
                 this.sending = false;
                 this.setData = [];
+                this.doneYet = false;
                 this.$emit('done', fhirs);
             }
         }
     },
-    mounted () {
+    async mounted () {
         this.openMonth(this.months[0]);
+        this.api = await new MedBlocks()
+        await this.api.login(this.hospitaldata.performer[0].actor.reference)
+        this.patientDetails = await this.getPatientDetails(this.patientdata)
     },
     template: `#temp`
 });
@@ -157,13 +205,13 @@ let DATA = new Vue({
     data: {
         config: defaultConfig,
         patientData: {
-            reference: "1234"
+            reference: "tornadoalert@gmail.com"
         },
         hospitalData: {
             performer: [
                 {
                     actor: {
-                        reference: "1235"
+                        reference: "doctor@healthgate.com"
                     }
                 }
             ],

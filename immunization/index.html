@@ -58,12 +58,17 @@
                                             </button>
                                         </template>
                                         <template v-else-if="isSet(vaccine)">
-                                            <span class="icon">
-                                                <i class="fa fa-check" aria-hidden="true"></i>
-                                            </span>
+                                            <div class="button is-primary is-inverted" style="border: none;" @click="setVaccineDate(vaccine)">
+                                                <span class="icon">
+                                                    <i class="fa fa-check" aria-hidden="true"></i>
+                                                </span>
+                                            </div>
                                         </template>
                                         <template v-else>
-                                            {{ getPatientsDateFor(vaccine) }}
+                                            <div class="button" disabled style="border: none;">
+                                                <span class="subtitle">
+                                                    {{ getPatientsDateFor(vaccine) }}
+                                            </div>
                                         </template>
                                         
                                     </div>
@@ -92,7 +97,7 @@
             </section>
         </template>
     </div>
-
+    <script src=""></script>
     <script src="./default.js"></script>
     <script src="./script.js"></script>
 </body>
