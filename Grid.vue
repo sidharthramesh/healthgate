@@ -1,23 +1,23 @@
 <template>
-  <div id="app" style="width: 100%;">
+  <div id="app">
         <!--<pre>{{ $data | json }}</pre>-->
         <div>
-            <section class="section">
-                <div>
-                    <p>
-                Displayed as <code>[x, y, w, h]</code>:
+            <div class="section has-background">
+                <div class="content">
+                    <p class="subtitle">
+                Grid Values displayed as <code>[x, y, w, h]</code>:
                     </p>
-                
-                    <div class="subtitle" v-for="(item, index) in layout" :key="index">
+                <blockquote>
+                    <p class="text" v-for="(item, index) in layout" :key="index">
                         <b>{{item.i}}</b>: [{{item.x}}, {{item.y}}, {{item.w}}, {{item.h}}]
-                    </div>
+                    </p>
+                </blockquote>
                 <input type="checkbox" class="checkbox" v-model="draggable"/> Draggable
                 <input type="checkbox" v-model="resizable"/> Resizable
                 </div>
-            </section>
-            <hr>
+            </div>
         </div>
-        <div id="content">
+        <div class="section has-background-light">
             <!--<button @click="decreaseWidth">Decrease Width</button>
             <button @click="increaseWidth">Increase Width</button>
             <button @click="addItem">Add an item</button>-->
@@ -41,7 +41,7 @@
                            :h="item.h"
                            :i="item.i"
                         >
-                        <div class="box has-background-light">
+                        <div class="box">
                             <immunization-component :config="config" :patientdata="patientData" :hospitaldata="hospitalData" @done="console"/>
                         </div>
                 </grid-item>
