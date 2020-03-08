@@ -2,6 +2,7 @@
   <section class="section">
                 <div class="container">
                     <h1 class="title">Immunization Details</h1>
+                    <hr>
                         <!-- Months of immunization -->
                         <div class="tabs">
                             <ul>

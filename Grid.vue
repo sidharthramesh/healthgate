@@ -42,7 +42,7 @@
                            :i="item.i"
                         >
                         <div class="box">
-                            <immunization-component :config="config" :patientdata="patientData" :hospitaldata="hospitalData" @done="console"/>
+                            <component :is="item.c" v-bind="item.props"> </component>
                         </div>
                 </grid-item>
             </grid-layout>
@@ -53,13 +53,50 @@
 <script>
 import {GridItem, GridLayout} from 'vue-grid-layout'
 import ImmunizationComponent from './immunization/Immunization.vue'
+import PatientComponent from './patient/Patient.vue'
 import defaultConfig from './immunization/default'
 import '@fortawesome/fontawesome-free/css/all.css'
 import '@fortawesome/fontawesome-free/js/all.js'
 
 var testLayout = [
-    {"x":0,"y":0,"w":4,"h":11,"i":"0", static: false, "minH":11},
-    {"x":4,"y":0,"w":4,"h":11,"i":"1", static: false, "minH":11},
+    {"x":0,"y":0,"w":4,"h":11,"i":"0", static: false, "minH":11, c: ImmunizationComponent, 
+    props: {
+            config: defaultConfig,
+            patientdata: {
+                reference: "tornadoalert@gmail.com"
+            },
+            
+            hospitaldata: {
+                performer: [
+                    {
+                        actor: {
+                            reference: "doctor@healthgate.com"
+                        }
+                    }
+                ],
+                location: {
+                    reference: "1236"
+                }
+            },
+        }},
+    {"x":4,"y":0,"w":5,"h":25,"i":"1", static: false, "minH":11, c: PatientComponent, props: {
+        patientdata: {
+                reference: "tornadoalert@gmail.com"
+            },
+            
+            hospitaldata: {
+                performer: [
+                    {
+                        actor: {
+                            reference: "doctor@healthgate.com"
+                        }
+                    }
+                ],
+                location: {
+                    reference: "1236"
+                }
+            },
+    }},
 ];
 export default {
     components: {
@@ -68,36 +105,13 @@ export default {
         ImmunizationComponent: ImmunizationComponent
     },
     data() {return {
-        config: defaultConfig,
-        patientData: {
-            reference: "tornadoalert@gmail.com"
-        },
-        
-        hospitalData: {
-            performer: [
-                {
-                    actor: {
-                        reference: "doctor@healthgate.com"
-                    }
-                }
-            ],
-            location: {
-                reference: "1236"
-            }
-        },
         layout: testLayout,
-        draggable: true,
+        draggable: false,
         resizable: true,
         index: 0
     }},
     methods: {
-        itemTitle(item) {
-            var result = item.i;
-            if (item.static) {
-                result += " - Static";
-            }
-            return result;
-        }
+
     }
 }
 </script>
