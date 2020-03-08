@@ -2,22 +2,26 @@
   <div id="app" style="width: 100%;">
         <!--<pre>{{ $data | json }}</pre>-->
         <div>
-            <div class="layoutJSON">
+            <section class="section">
+                <div>
+                    <p>
                 Displayed as <code>[x, y, w, h]</code>:
-                <div class="columns">
-                    <div class="layoutItem" v-for="(item, index) in layout" :key="index">
+                    </p>
+                
+                    <div class="subtitle" v-for="(item, index) in layout" :key="index">
                         <b>{{item.i}}</b>: [{{item.x}}, {{item.y}}, {{item.w}}, {{item.h}}]
                     </div>
+                <input type="checkbox" class="checkbox" v-model="draggable"/> Draggable
+                <input type="checkbox" v-model="resizable"/> Resizable
                 </div>
-            </div>
+            </section>
+            <hr>
         </div>
         <div id="content">
             <!--<button @click="decreaseWidth">Decrease Width</button>
             <button @click="increaseWidth">Increase Width</button>
             <button @click="addItem">Add an item</button>-->
-            <input type="checkbox" v-model="draggable"/> Draggable
-            <input type="checkbox" v-model="resizable"/> Resizable
-            <br/>
+            
             <grid-layout :layout="layout"
                          :col-num="12"
                          :row-height="30"
@@ -37,7 +41,9 @@
                            :h="item.h"
                            :i="item.i"
                         >
-                    <immunization-component :config="config" :patientdata="patientData" :hospitaldata="hospitalData" @done="console"/>
+                        <div class="box has-background-light">
+                            <immunization-component :config="config" :patientdata="patientData" :hospitaldata="hospitalData" @done="console"/>
+                        </div>
                 </grid-item>
             </grid-layout>
         </div>
