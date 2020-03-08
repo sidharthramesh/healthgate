@@ -1,15 +1,14 @@
 {
   "name": "healthgate",
   "version": "0.0.1",
-  "description": "FHIR compatible Vue components",
+  "description": "Vue UI components for FHIR generation",
+  "main": "App.vue",
   "dependencies": {
+    "vue-grid-layout": "^2.3.7",
     "medblocks": "^0.0.2-1",
-    "vue": "^2.6.11",
-    "vue-grid-layout": "^2.3.7"
-  },
-  "devDependencies": {
     "@fortawesome/fontawesome-free": "^5.12.1"
   },
+  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
