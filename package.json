@@ -3,9 +3,13 @@
   "version": "0.0.1",
   "description": "FHIR compatible Vue components",
   "dependencies": {
-    "medblocks": "^0.0.2-1"
+    "medblocks": "^0.0.2-1",
+    "vue": "^2.6.11",
+    "vue-grid-layout": "^2.3.7"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@fortawesome/fontawesome-free": "^5.12.1"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

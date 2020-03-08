@@ -1,4 +1,4 @@
-defaultConfig = [
+var defaultConfig = [
     {
         name: 'At Birth',
         vaccines: [
@@ -971,3 +971,5 @@ defaultConfig = [
         ]
     }
 ]
+
+export default defaultConfig
