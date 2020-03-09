@@ -1,5 +1,99 @@
-// V0.1
+<template>
+  <section class="container">
+    <h1 class="title">Immunization Details</h1>
+    <hr>
+        <!-- Months of immunization -->
+        <div class="tabs">
+            <ul>
+                <template v-for="(month,i) in months">
+                    <li :class="{ 'is-active': currentMonth === month }" @click="openMonth(month)" :key="i"><a>{{ month }}</a></li>
+                </template>
+            </ul>
+            </div>
+        <div class="container">
+            <!-- Age and Date at which age is attained -->
+            <div class="level is-mobile">
+                <div class="level-left">
+                    <h1 class="title">
+                        {{ currentMonth }}
+                    </h1>
+                </div>
+                <div class="level-right">
+                    <h1 class="subtitle">
+                        {{ ptn_age }}
+                    </h1>
+                </div>
+            </div>
+            <!-- Vaccinations to be given -->
+            <template v-for="(vaccine,i) in vaccines">
+            <div class="level is-mobile" :key="i">
+                    <div class="level-left">
+                        <h3 class="is-size-4">{{vaccine.vaccineCode.text}}</h3>
+                    </div>
+                    <div class="level-right">
+                        <template v-if="getPatientsDateFor(vaccine) === false && !isSet(vaccine)">
+                            <button class="button has-text-primary" @click="setVaccineDate(vaccine)">
+                                <span class="icon">
+                                    <i class="fa fa-calendar" aria-hidden="true"></i>
+                                </span>
+                                <span class="is-size-6 is-uppercase has-text-weight-semibold">
+                                    Set date
+                                </span>
+                            </button>
+                        </template>
+                        <template v-else-if="isSet(vaccine)">
+                            <div class="button is-primary is-inverted" style="border: none;" @click="setVaccineDate(vaccine)">
+                                <span class="icon">
+                                    <i class="fa fa-check" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                        </template>
+                        <template v-else>
+                            <div class="button" disabled style="border: none;">
+                                <span class="subtitle">
+                                    {{ getPatientsDateFor(vaccine) }}
+                                </span>
+                            </div>
+                        </template>
+                        
+                    </div>
+                </div>
+            </template>
+            <!-- Done button -->
+            <template v-if="doneYet">
+                <div class="level is-mobile">
+                    <div class="level-left">
+                    </div>
+                    <div class="level-right">
+                        <!-- Remove is-loading to see text -->
+                        <div class="buttons">
+                        <button class="button is-danger is-inverted" @click="clear">
+                        <span class="icon">
+                            <i class="fa fa-times" aria-hidden="true"></i>
+                        </span>
+                        <span class="is-uppercase is-size-6 is-uppercase has-text-weight-semibold">
+                            Cancel
+                        </span>
+                        </button>
+                        <button class="button is-primary" :class="{ 'is-loading': sending }" @click="done()"> 
+                                <span class="icon">
+                                    <i class="fa fa-check" aria-hidden="true"></i>
+                                </span>
+                                <span class="is-size-6 is-uppercase has-text-weight-semibold">
+                                    Done
+                                </span>
+                        </button>
+                        </div>
+                        
+                    </div>
+                </div>
+            </template>
+        </div>
+    </section>
+</template>
 
+<script>
+import MedBlocks from 'medblocks'
 let IMMUNIZATION_FHIR = `{
     "resourceType" : "Immunization",
     "status" : "completed",
@@ -27,9 +121,8 @@ let IMMUNIZATION_FHIR = `{
         "documentType" : "HealthGate Passport",
         "publicationDate" : "05-03-20202020-03-05T07:22:31.345Z"
     }]
-}`;
-
-Vue.component('immunization-component', {
+}`
+export default {
     props: ['config', 'patientdata', 'hospitaldata'],
     data () {
         return {
@@ -71,7 +164,7 @@ Vue.component('immunization-component', {
         async getPatientDetails (patientData) {
             var vaccines = await this.api.list(patientData.reference, "Immunization")
             var patient = await this.api.list(patientData.reference, "Patient")
-            console.log(vaccines)
+            // console.debug(vaccines)
             patient = await Promise.all(patient.map(hash=>this.api.get(hash)))
             vaccines = (await Promise.all(vaccines.map(hash=>this.api.get(hash)))).map(
                 a=>{
@@ -82,7 +175,9 @@ Vue.component('immunization-component', {
                         return
                     }
                 }
-                ).filter(a=>a)
+                ).filter(a=>{
+                    return a && a.resourceType=="Immunization"
+                    })
             return {
                 vaccines: vaccines,
                 patient: patient
@@ -105,6 +200,10 @@ Vue.component('immunization-component', {
 
         },
 
+        clear() {
+            this.setData = []
+            this.doneYet = false
+        },
         isSet (vaccine) {
             return (this.setData.find(v => v.vaccineCode.text === vaccine.vaccineCode.text) !== undefined)
         },
@@ -114,7 +213,7 @@ Vue.component('immunization-component', {
             return (data && data.status === 'completed') ? new Date(data.occurrenceDateTime).toLocaleDateString("en-IN") : false;
         },
 
-        async createEncounterFHIR (patientData, hospitalData) {
+        createEncounterFHIR (patientData, hospitalData) {
             return JSON.stringify({
                 "resourceType": "Encounter",
                 "status": "finished",
@@ -159,8 +258,8 @@ Vue.component('immunization-component', {
                 throw new Error('Not valid data');
             }
         },
-        async postFHIR(fhir, patientData) {
-            hash = await this.api.add(fhir, "Immunization")
+        async postFHIR(fhir, patientData, resourceType) {
+            let hash = await this.api.add(fhir, resourceType)
             await this.api.permit(hash, patientData.reference)
             return hash
         },
@@ -171,16 +270,16 @@ Vue.component('immunization-component', {
                 this.sending = true;
                 let fhirs = [];
                 let encounter = this.createEncounterFHIR(this.patientdata, this.hospitaldata);
-                let encounterHash = await this.postFHIR(encounter, this.patientdata)
+                let encounterHash = await this.postFHIR(encounter, this.patientdata, "Encounter")
                 fhirs.push(encounterHash);
                 let immuns = this.setData.map(data => this.createImmunizationFHIR(data, {
                     patient: this.patientdata
                 }, this.hospitaldata, {
                     encounter: {
-                        reference: hash
+                        reference: encounterHash
                     }
                 }));
-                let hashList = await Promise.all(immuns.map(fhir=>this.postFHIR(fhir, this.patientdata)))
+                let hashList = await Promise.all(immuns.map(fhir=>this.postFHIR(fhir, this.patientdata, "Immunization")))
                 fhirs = fhirs.concat(hashList);
                 //Set this 
                 this.patientDetails = await this.getPatientDetails(this.patientdata)
@@ -196,33 +295,10 @@ Vue.component('immunization-component', {
         this.api = await new MedBlocks()
         await this.api.login(this.hospitaldata.performer[0].actor.reference)
         this.patientDetails = await this.getPatientDetails(this.patientdata)
-    },
-    template: `#temp`
-});
-
-let DATA = new Vue({
-    el: '#body',
-    data: {
-        config: defaultConfig,
-        patientData: {
-            reference: "tornadoalert@gmail.com"
-        },
-        hospitalData: {
-            performer: [
-                {
-                    actor: {
-                        reference: "doctor@healthgate.com"
-                    }
-                }
-            ],
-            location: {
-                reference: "1236"
-            }
-        }
-    },
-    methods: {
-        console (...a) {
-            console.log(...a);
-        }
     }
-})
+}
+</script>
+
+<style>
+
+</style>
