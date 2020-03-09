@@ -40,9 +40,24 @@
                            :w="item.w"
                            :h="item.h"
                            :i="item.i"
+                           :dragAllowFrom="'.drag-icon'"
                         >
                         <div class="box">
+                            <div class="container">
+                                <div class="level drag-icon">
+                                    <div class="level-item">
+                                    </div>
+                                    <div class="level-item ">
+                                        <span class="icon has-text-grey-light">
+                                        <i class="fas fa-grip-lines"></i>
+                                        </span>
+                                    </div>
+                                    <div class="level-item">
+                                    </div>
+                                    <a class="delete"></a>
+                                </div>
                             <component :is="item.c" v-bind="item.props"> </component>
+                            </div>
                         </div>
                 </grid-item>
             </grid-layout>
@@ -106,7 +121,7 @@ export default {
     },
     data() {return {
         layout: testLayout,
-        draggable: false,
+        draggable: true,
         resizable: true,
         index: 0
     }},

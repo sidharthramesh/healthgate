@@ -1,86 +1,95 @@
 <template>
-  <section class="section">
-                <div class="container">
-                    <h1 class="title">Immunization Details</h1>
-                    <hr>
-                        <!-- Months of immunization -->
-                        <div class="tabs">
-                            <ul>
-                                <template v-for="(month,i) in months">
-                                    <li :class="{ 'is-active': currentMonth === month }" @click="openMonth(month)" :key="i"><a>{{ month }}</a></li>
-                                </template>
-                            </ul>
-                          </div>
-                        <div class="container">
-                            <!-- Age and Date at which age is attained -->
-                            <div class="level is-mobile">
-                                <div class="level-left">
-                                    <h1 class="title">
-                                        {{ currentMonth }}
-                                    </h1>
-                                </div>
-                                <div class="level-right">
-                                    <h1 class="subtitle">
-                                        {{ ptn_age }}
-                                    </h1>
-                                </div>
-                            </div>
-                            <!-- Vaccinations to be given -->
-                            <template v-for="(vaccine,i) in vaccines">
-                            <div class="level is-mobile" :key="i">
-                                    <div class="level-left">
-                                        <h3 class="is-size-4">{{vaccine.vaccineCode.text}}</h3>
-                                    </div>
-                                    <div class="level-right">
-                                        <template v-if="getPatientsDateFor(vaccine) === false && !isSet(vaccine)">
-                                            <button class="button has-text-primary" @click="setVaccineDate(vaccine)">
-                                                <span class="icon">
-                                                    <i class="fa fa-calendar" aria-hidden="true"></i>
-                                                </span>
-                                                <span class="is-size-6 is-uppercase has-text-weight-semibold">
-                                                    Set date
-                                                </span>
-                                            </button>
-                                        </template>
-                                        <template v-else-if="isSet(vaccine)">
-                                            <div class="button is-primary is-inverted" style="border: none;" @click="setVaccineDate(vaccine)">
-                                                <span class="icon">
-                                                    <i class="fa fa-check" aria-hidden="true"></i>
-                                                </span>
-                                            </div>
-                                        </template>
-                                        <template v-else>
-                                            <div class="button" disabled style="border: none;">
-                                                <span class="subtitle">
-                                                    {{ getPatientsDateFor(vaccine) }}
-                                                </span>
-                                            </div>
-                                        </template>
-                                        
-                                    </div>
-                                </div>
-                            </template>
-                            <!-- Done button -->
-                            <template v-if="doneYet">
-                                <div class="level is-mobile">
-                                    <div class="level-left">
-                                    </div>
-                                    <div class="level-right">
-                                        <!-- Remove is-loading to see text -->
-                                        <button class="button is-primary" :class="{ 'is-loading': sending }" @click="done()"> 
-                                                <span class="icon">
-                                                    <i class="fa fa-check" aria-hidden="true"></i>
-                                                </span>
-                                                <span class="is-size-6 is-uppercase has-text-weight-semibold">
-                                                    Done
-                                                </span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
+  <section class="container">
+    <h1 class="title">Immunization Details</h1>
+    <hr>
+        <!-- Months of immunization -->
+        <div class="tabs">
+            <ul>
+                <template v-for="(month,i) in months">
+                    <li :class="{ 'is-active': currentMonth === month }" @click="openMonth(month)" :key="i"><a>{{ month }}</a></li>
+                </template>
+            </ul>
+            </div>
+        <div class="container">
+            <!-- Age and Date at which age is attained -->
+            <div class="level is-mobile">
+                <div class="level-left">
+                    <h1 class="title">
+                        {{ currentMonth }}
+                    </h1>
                 </div>
-            </section>
+                <div class="level-right">
+                    <h1 class="subtitle">
+                        {{ ptn_age }}
+                    </h1>
+                </div>
+            </div>
+            <!-- Vaccinations to be given -->
+            <template v-for="(vaccine,i) in vaccines">
+            <div class="level is-mobile" :key="i">
+                    <div class="level-left">
+                        <h3 class="is-size-4">{{vaccine.vaccineCode.text}}</h3>
+                    </div>
+                    <div class="level-right">
+                        <template v-if="getPatientsDateFor(vaccine) === false && !isSet(vaccine)">
+                            <button class="button has-text-primary" @click="setVaccineDate(vaccine)">
+                                <span class="icon">
+                                    <i class="fa fa-calendar" aria-hidden="true"></i>
+                                </span>
+                                <span class="is-size-6 is-uppercase has-text-weight-semibold">
+                                    Set date
+                                </span>
+                            </button>
+                        </template>
+                        <template v-else-if="isSet(vaccine)">
+                            <div class="button is-primary is-inverted" style="border: none;" @click="setVaccineDate(vaccine)">
+                                <span class="icon">
+                                    <i class="fa fa-check" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                        </template>
+                        <template v-else>
+                            <div class="button" disabled style="border: none;">
+                                <span class="subtitle">
+                                    {{ getPatientsDateFor(vaccine) }}
+                                </span>
+                            </div>
+                        </template>
+                        
+                    </div>
+                </div>
+            </template>
+            <!-- Done button -->
+            <template v-if="doneYet">
+                <div class="level is-mobile">
+                    <div class="level-left">
+                    </div>
+                    <div class="level-right">
+                        <!-- Remove is-loading to see text -->
+                        <div class="buttons">
+                        <button class="button is-danger is-inverted" @click="clear">
+                        <span class="icon">
+                            <i class="fa fa-times" aria-hidden="true"></i>
+                        </span>
+                        <span class="is-uppercase is-size-6 is-uppercase has-text-weight-semibold">
+                            Cancel
+                        </span>
+                        </button>
+                        <button class="button is-primary" :class="{ 'is-loading': sending }" @click="done()"> 
+                                <span class="icon">
+                                    <i class="fa fa-check" aria-hidden="true"></i>
+                                </span>
+                                <span class="is-size-6 is-uppercase has-text-weight-semibold">
+                                    Done
+                                </span>
+                        </button>
+                        </div>
+                        
+                    </div>
+                </div>
+            </template>
+        </div>
+    </section>
 </template>
 
 <script>
@@ -191,6 +200,10 @@ export default {
 
         },
 
+        clear() {
+            this.setData = []
+            this.doneYet = false
+        },
         isSet (vaccine) {
             return (this.setData.find(v => v.vaccineCode.text === vaccine.vaccineCode.text) !== undefined)
         },
