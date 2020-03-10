@@ -109,16 +109,16 @@
 
             <div class="content" :class="{'is-hidden':edit}">
                 <!-- Details -->
-                <h1 v-if="oldFHIR.name[0].text">{{oldFHIR.name[0].text}} </h1>
+                <h1 v-if="oldFHIR.name">{{oldFHIR.name[0].text}} </h1>
                 <p v-if="oldFHIR.gender">
                     <span class="icon has-text-link" v-if="oldFHIR.gender=='male'"><i class="fas fa-mars"></i></span>
                     <span class="icon has-text-danger" v-if="oldFHIR.gender=='female'"><i class="fas fa-venus"></i></span>
                     <span class="is-capitalized">{{oldFHIR.gender}}</span>
                 </p>
-                <p v-if="this.oldFHIR.identifier[1].value"><strong>OPD number: </strong>{{this.oldFHIR.identifier[1].value}}</p>
-                <p v-if="oldFHIR.telecom[0].value"><strong>Phone number: </strong>{{oldFHIR.telecom[0].value}}</p>
+                <p v-if="this.oldFHIR.identifier"><strong>OPD number: </strong>{{this.oldFHIR.identifier[1].value}}</p>
+                <p v-if="oldFHIR.telecom"><strong>Phone number: </strong>{{oldFHIR.telecom[0].value}}</p>
                 <p v-if="oldFHIR.birthDate"><strong>Date of birth: </strong>{{oldFHIR.birthDate}}</p>
-                <p v-if="oldFHIR.address[0].text"><strong>Address: </strong>{{oldFHIR.address[0].text}}</p>
+                <p v-if="oldFHIR.address"><strong>Address: </strong>{{oldFHIR.address[0].text}}</p>
                 <p v-if="oldFHIR.mother"><strong>Mother's name </strong>{{oldFHIR.mother}}</p>
                 <p v-if="oldFHIR.father"><strong>Father's name </strong>{{oldFHIR.father}}</p>
         </div>
